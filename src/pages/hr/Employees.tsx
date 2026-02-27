@@ -1,76 +1,150 @@
+import { useState, useEffect } from 'react';
 import { DataTable } from '../../components/ui/DataTable';
+import { Modal } from '../../components/ui/Modal';
+import { EmployeeForm } from './EmployeeForm';
+import { toast } from 'sonner';
+import { StatusBadge } from '../../components/ui/StatusBadge';
+import { hrService, type Employee } from '../../api/hrService';
+import { Plus, Users, ShieldCheck } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
-
-interface Employee {
-    id: string;
-    name: string;
-    role: string;
-    department: string;
-    email: string;
-    status: "Active" | "On Leave" | "Terminated";
-}
-
-const data: Employee[] = [
-    { id: "EMP-001", name: "John Doe", role: "Software Engineer", department: "Engineering", email: "john@neurynth.com", status: "Active" },
-    { id: "EMP-002", name: "Jane Smith", role: "Product Manager", department: "Product", email: "jane@neurynth.com", status: "Active" },
-    { id: "EMP-003", name: "Mike Johnson", role: "Designer", department: "Design", email: "mike@neurynth.com", status: "On Leave" },
-    { id: "EMP-004", name: "Sarah Connor", role: "Security Chief", department: "Operations", email: "sarah@neurynth.com", status: "Active" },
-    { id: "EMP-005", name: "Robert Stark", role: "CEO", department: "Executive", email: "robert@neurynth.com", status: "Active" },
-    { id: "EMP-006", name: "Emily Blunt", role: "HR Specialist", department: "Human Resources", email: "emily@neurynth.com", status: "Active" },
-    { id: "EMP-007", name: "Chris Evans", role: "Sales Lead", department: "Sales", email: "chris@neurynth.com", status: "Terminated" },
-];
 
 export default function Employees() {
+    const { t } = useTranslation();
+    const [employees, setEmployees] = useState<Employee[]>([]);
+    const [isLoading, setIsLoading] = useState(true);
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [selectedEmployee, setSelectedEmployee] = useState<Employee | null>(null);
+
+    useEffect(() => { loadEmployees(); }, []);
+
+    const loadEmployees = async () => {
+        try {
+            const data = await hrService.getAll();
+            setEmployees(data);
+        } catch (error) {
+            console.error(error);
+            toast.error(t('hr.sync_error'));
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    const handleEmployeeSubmit = async (formData: Omit<Employee, 'id' | 'avatar'>) => {
+        try {
+            if (selectedEmployee) {
+                await hrService.update(selectedEmployee.id, formData);
+                toast.success(t('common.success'));
+            } else {
+                await hrService.create({ ...formData, avatar: '' });
+                toast.success(t('common.success'));
+            }
+            setIsModalOpen(false);
+            setSelectedEmployee(null);
+            loadEmployees();
+        } catch (error) {
+            toast.error(t('hr.sync_error'));
+        }
+    };
+
+    const handleDeleteEmployee = async (employee: Employee) => {
+        if (confirm(t('common.confirm_delete') || `Delete ${employee.name}?`)) {
+            try {
+                await hrService.delete(employee.id);
+                toast.success(t('common.success'));
+                loadEmployees();
+            } catch (error) {
+                toast.error(t('hr.sync_error'));
+            }
+        }
+    };
+
+    const handleEditEmployee = (employee: Employee) => {
+        setSelectedEmployee(employee);
+        setIsModalOpen(true);
+    };
+
     const columns = [
+        { header: t('hr.form.name'), accessorKey: "name" as keyof Employee },
+        { header: t('hr.form.role'), accessorKey: "role" as keyof Employee },
+        { header: t('hr.form.department'), accessorKey: "department" as keyof Employee },
         {
-            header: "Employee",
-            accessorKey: "name" as keyof Employee,
-            cell: (item: Employee) => (
-                <div className="flex items-center gap-3">
-                    <div className="h-8 w-8 rounded-full bg-blue-100 dark:bg-blue-900/50 flex items-center justify-center text-blue-700 dark:text-blue-300 font-bold text-xs">
-                        {item.name.charAt(0)}
-                    </div>
-                    <div>
-                        <p className="font-medium text-gray-900 dark:text-white">{item.name}</p>
-                        <p className="text-xs text-gray-500 dark:text-gray-400">{item.id}</p>
-                    </div>
-                </div>
-            )
-        },
-        { header: "Role", accessorKey: "role" as keyof Employee },
-        { header: "Department", accessorKey: "department" as keyof Employee },
-        { header: "Email", accessorKey: "email" as keyof Employee },
-        {
-            header: "Status",
+            header: t('hr.form.status'),
             accessorKey: "status" as keyof Employee,
             cell: (item: Employee) => {
-                const styles = {
-                    Active: "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400",
-                    "On Leave": "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400",
-                    Terminated: "bg-gray-100 text-gray-600 dark:bg-zinc-800 dark:text-gray-400"
-                };
-                return (
-                    <span className={`px-3 py-1 rounded-full text-xs font-medium w-fit ${styles[item.status]}`}>
-                        {item.status}
-                    </span>
-                );
+                const variant = item.status === 'Active' ? 'success' : item.status === 'Terminated' ? 'danger' : 'warning';
+                const statusLabel = item.status === 'Active' ? t('hr.status_active') : item.status === 'Terminated' ? t('hr.status_terminated') : t('hr.status_on_leave');
+                return <StatusBadge status={statusLabel} variant={variant} animate={item.status === 'Active'} />;
             }
         },
     ];
 
+    if (isLoading) return (
+        <div className="flex flex-col items-center justify-center min-h-[400px] space-y-4">
+            <div className="w-12 h-12 border-4 border-blue-600 border-t-transparent rounded-full animate-spin" />
+            <p className="text-xs font-black uppercase tracking-[0.2em] text-gray-400">{t('common.loading')}</p>
+        </div>
+    );
+
     return (
-        <div className="space-y-6">
-            <div className="flex justify-between items-end">
+        <div className="space-y-10 pb-10">
+            <div className="fixed inset-0 pointer-events-none overflow-hidden -z-10">
+                <div className="absolute top-[-5%] right-[-5%] w-[35%] h-[35%] bg-blue-600/5 blur-[100px] rounded-full animate-pulse" />
+                <div className="absolute bottom-[20%] left-[-5%] w-[30%] h-[30%] bg-indigo-600/5 blur-[100px] rounded-full animate-pulse delay-700" />
+            </div>
+
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
                 <div>
-                    <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Human Resources</h1>
-                    <p className="text-gray-500 dark:text-gray-400 mt-2">Directory of all active and past employees.</p>
+                    <h1 className="text-4xl font-extrabold text-gray-900 dark:text-white tracking-tight">
+                        {t('hr.title').split(' ')[0]} <span className="text-blue-600">{t('hr.title').split(' ').slice(1).join(' ')}</span>
+                    </h1>
+                    <p className="text-gray-500 dark:text-gray-400 mt-2 font-medium flex items-center gap-2">
+                        <Users className="h-4 w-4 text-emerald-500" />
+                        {t('hr.subtitle')} ({employees.length})
+                    </p>
                 </div>
-                <button className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium shadow-sm transition-colors">
-                    + Add Employee
+                <button
+                    onClick={() => setIsModalOpen(true)}
+                    className="flex items-center gap-2 px-8 py-3 bg-blue-600 text-white rounded-2xl text-sm font-black shadow-xl shadow-blue-500/30 hover:bg-blue-700 hover:-translate-y-1 transition-all active:scale-95 w-fit"
+                >
+                    <Plus className="h-5 w-5" /> {t('common.add_node')}
                 </button>
             </div>
 
-            <DataTable data={data} columns={columns} title="Employee Directory" searchKey="name" searchPlaceholder="Search employees..." />
+            <div className="bg-white/40 dark:bg-zinc-900/40 backdrop-blur-xl rounded-[32px] border border-white/20 dark:border-zinc-800/50 shadow-2xl p-2 overflow-hidden">
+                <DataTable
+                    data={employees}
+                    columns={columns}
+                    title={t('hr.title')}
+                    searchKey="name"
+                    searchPlaceholder={t('common.search')}
+                    onEdit={handleEditEmployee}
+                    onDelete={handleDeleteEmployee}
+                />
+            </div>
+
+            <Modal
+                isOpen={isModalOpen}
+                onClose={() => {
+                    setIsModalOpen(false);
+                    setSelectedEmployee(null);
+                }}
+                title={selectedEmployee ? t('hr.edit_employee') : t('hr.integrate_title')}
+            >
+                <div className="p-1">
+                    <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-6 flex items-center gap-2">
+                        <ShieldCheck className="h-3 w-3 text-blue-500" /> {t('hr.security_clearance')}
+                    </p>
+                    <EmployeeForm
+                        onSubmit={handleEmployeeSubmit}
+                        onCancel={() => {
+                            setIsModalOpen(false);
+                            setSelectedEmployee(null);
+                        }}
+                        initialData={selectedEmployee || undefined}
+                    />
+                </div>
+            </Modal>
         </div>
     );
 }

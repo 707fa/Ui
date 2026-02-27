@@ -1,0 +1,17 @@
+[
+  {
+    "title": "To Do",
+    "color": "gray",
+    "items": []
+  },
+  {
+    "title": "In Progress",
+    "color": "blue",
+    "items": []
+  },
+  {
+    "title": "Completed",
+    "color": "green",
+    "items": []
+  }
+]

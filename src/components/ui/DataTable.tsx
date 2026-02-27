@@ -1,10 +1,11 @@
 import { useState } from 'react';
-import { Search, ChevronLeft, ChevronRight, ArrowUpDown } from 'lucide-react';
+import { Edit2, Trash2, Search, ChevronLeft, ChevronRight, ArrowUpDown } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useTranslation } from 'react-i18next';
 
 interface Column<T> {
     header: string;
-    accessorKey: keyof T;
+    accessorKey?: keyof T;
     cell?: (item: T) => React.ReactNode;
 }
 
@@ -14,15 +15,20 @@ interface DataTableProps<T> {
     title: string;
     searchPlaceholder?: string;
     searchKey?: keyof T;
+    onEdit?: (item: T) => void;
+    onDelete?: (item: T) => void;
 }
 
 export function DataTable<T extends { id: number | string }>({
     data,
     columns,
     title,
-    searchPlaceholder = "Search...",
-    searchKey
+    searchPlaceholder,
+    searchKey,
+    onEdit,
+    onDelete
 }: DataTableProps<T>) {
+    const { t } = useTranslation();
     const [search, setSearch] = useState("");
     const [currentPage, setCurrentPage] = useState(1);
     const itemsPerPage = 7;
@@ -46,13 +52,15 @@ export function DataTable<T extends { id: number | string }>({
             <div className="p-5 border-b border-gray-200 dark:border-zinc-800 flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>
                     <h3 className="text-lg font-bold text-gray-900 dark:text-white">{title}</h3>
-                    <p className="text-sm text-gray-500 dark:text-gray-400">Total {filteredData.length} records found</p>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">
+                        {t('common.records_found', { count: filteredData.length })}
+                    </p>
                 </div>
                 <div className="relative">
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
                     <input
                         type="text"
-                        placeholder={searchPlaceholder}
+                        placeholder={searchPlaceholder || t('common.search')}
                         value={search}
                         onChange={(e) => { setSearch(e.target.value); setCurrentPage(1); }}
                         className="pl-9 pr-4 py-2 bg-gray-50 dark:bg-zinc-800 border-none rounded-lg text-sm focus:ring-2 focus:ring-blue-500 text-gray-900 dark:text-white w-64 shadow-inner"
@@ -72,6 +80,9 @@ export function DataTable<T extends { id: number | string }>({
                                     </div>
                                 </th>
                             ))}
+                            {(onEdit || onDelete) && (
+                                <th className="px-6 py-4 text-right">{t('common.actions')}</th>
+                            )}
                         </tr>
                     </thead>
                     <tbody className="divide-y divide-gray-100 dark:divide-zinc-800">
@@ -87,15 +98,39 @@ export function DataTable<T extends { id: number | string }>({
                                     >
                                         {columns.map((col, cIdx) => (
                                             <td key={cIdx} className="px-6 py-4 text-sm text-gray-700 dark:text-gray-300">
-                                                {col.cell ? col.cell(item) : String(item[col.accessorKey])}
+                                                {col.cell ? col.cell(item) : (col.accessorKey ? String(item[col.accessorKey]) : '')}
                                             </td>
                                         ))}
+                                        {(onEdit || onDelete) && (
+                                            <td className="px-6 py-4 text-right">
+                                                <div className="flex justify-end gap-2">
+                                                    {onEdit && (
+                                                        <button
+                                                            onClick={() => onEdit(item)}
+                                                            className="p-1.5 hover:bg-blue-50 dark:hover:bg-blue-900/20 text-blue-600 dark:text-blue-400 rounded-lg transition-colors"
+                                                            title={t('common.edit')}
+                                                        >
+                                                            <Edit2 className="h-4 w-4" />
+                                                        </button>
+                                                    )}
+                                                    {onDelete && (
+                                                        <button
+                                                            onClick={() => onDelete(item)}
+                                                            className="p-1.5 hover:bg-red-50 dark:hover:bg-red-900/20 text-red-600 dark:text-red-400 rounded-lg transition-colors"
+                                                            title={t('common.delete')}
+                                                        >
+                                                            <Trash2 className="h-4 w-4" />
+                                                        </button>
+                                                    )}
+                                                </div>
+                                            </td>
+                                        )}
                                     </motion.tr>
                                 ))
                             ) : (
                                 <tr>
-                                    <td colSpan={columns.length} className="px-6 py-12 text-center text-gray-500 dark:text-gray-400">
-                                        No results found
+                                    <td colSpan={columns.length + ((onEdit || onDelete) ? 1 : 0)} className="px-6 py-12 text-center text-gray-500 dark:text-gray-400">
+                                        {t('common.no_results')}
                                     </td>
                                 </tr>
                             )}
@@ -113,7 +148,7 @@ export function DataTable<T extends { id: number | string }>({
                     <ChevronLeft className="h-5 w-5" />
                 </button>
                 <span className="text-sm text-gray-600 dark:text-gray-400 font-medium">
-                    Page {currentPage} of {totalPages || 1}
+                    {t('common.page_info', { current: currentPage, total: totalPages || 1 })}
                 </span>
                 <button
                     onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}

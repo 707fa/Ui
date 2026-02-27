@@ -1,0 +1,38 @@
+[
+  {
+    "id": "#ORD-1001",
+    "date": "2026-02-27",
+    "customer": "Card: FDSJSDVJFVJFJVDSJVSFJVJVJVJWJWJVWJV",
+    "total": 400,
+    "status": "Paid",
+    "items": 2,
+    "details": [
+      {
+        "id": "4",
+        "quantity": 1
+      },
+      {
+        "id": "3",
+        "quantity": 1
+      }
+    ]
+  },
+  {
+    "id": "#ORD-1002",
+    "date": "2026-02-27",
+    "customer": "Payme: +998978778177",
+    "total": 430,
+    "status": "Paid",
+    "items": 2,
+    "details": [
+      {
+        "id": "3",
+        "quantity": 1
+      },
+      {
+        "id": "2",
+        "quantity": 1
+      }
+    ]
+  }
+]

@@ -1,0 +1,56 @@
+[
+  {
+    "id": "1",
+    "name": "Кофе Латте",
+    "price": 350,
+    "category": "Drinks",
+    "stock": 50,
+    "status": "In Stock",
+    "image": "bg-amber-100 text-amber-600"
+  },
+  {
+    "id": "2",
+    "name": "Круассан",
+    "price": 180,
+    "category": "Food",
+    "stock": 19,
+    "status": "In Stock",
+    "image": "bg-orange-100 text-orange-600"
+  },
+  {
+    "id": "3",
+    "name": "Чизкейк",
+    "price": 250,
+    "category": "Dessert",
+    "stock": 8,
+    "status": "Low Stock",
+    "image": "bg-yellow-100 text-yellow-600"
+  },
+  {
+    "id": "4",
+    "name": "Эспрессо",
+    "price": 150,
+    "category": "Drinks",
+    "stock": 99,
+    "status": "In Stock",
+    "image": "bg-amber-900/10 text-amber-900"
+  },
+  {
+    "id": "5",
+    "name": "Сэндвич",
+    "price": 300,
+    "category": "Food",
+    "stock": 5,
+    "status": "Low Stock",
+    "image": "bg-green-100 text-green-600"
+  },
+  {
+    "id": "6",
+    "name": "Чай Зеленый",
+    "price": 120,
+    "category": "Drinks",
+    "stock": 60,
+    "status": "In Stock",
+    "image": "bg-emerald-100 text-emerald-600"
+  }
+]

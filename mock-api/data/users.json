@@ -1,0 +1,41 @@
+[
+  {
+    "id": "1770599257242",
+    "username": "Admin1",
+    "email": "farrrux120@gmail.com",
+    "password": "123456",
+    "displayName": "Admin1"
+  },
+  {
+    "id": "1770599395552",
+    "username": "user_1770599395518",
+    "email": "test_1770599395518@example.com",
+    "password": "password123",
+    "displayName": "user_1770599395518"
+  },
+  {
+    "id": "1770599446785",
+    "username": "user_1770599446747",
+    "email": "test_1770599446747@example.com",
+    "password": "password123",
+    "displayName": "user_1770599446747"
+  },
+  {
+    "id": "1772142256976",
+    "username": "Admin2",
+    "email": "longo707a@gmail.com",
+    "salt": "5edfea9977d193ad69b90c62d32f1e03",
+    "hash": "a2ed2fa27fc8d8ae3ab92188d19eb21f3e32a180f0cb1e5ee0314a193d5cce5f94b9f6284acd93a1f97ee29b6a597564e559dc88473fcc628c582f9c2904ae1f",
+    "displayName": "Admin2"
+
+  },
+   {
+    "id": "1772142256276",
+    "username": "Admin3",
+    "email": "[EMAIL_ADDRESS]",
+    "salt": "5edfea9977d193ad69b90c62d32f1e03",
+    "hash": "a2ed2fa27fc8d8ae3ab92188d19eb21f3e32a180f0cb1e5ee0314a193d5cce5f94b9f6284acd93a1f97ee29b6a597564e559dc88473fcc628c582f9c2904ae1f",
+    "displayName": "Admin3"
+    
+  }
+]
