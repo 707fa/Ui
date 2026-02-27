@@ -60,7 +60,7 @@ export default function Sales() {
         {
             header: t('sales.total'),
             accessorKey: "total" as keyof Order,
-            cell: (item: Order) => <span className="font-black text-gray-900 dark:text-white">${(item.total || 0).toLocaleString()}</span>
+            cell: (item: Order) => <span className="font-black text-gray-900 dark:text-white">{(item.total || 0).toLocaleString()} сум</span>
         },
         {
             header: t('sales.status'),
@@ -119,7 +119,7 @@ export default function Sales() {
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                 {[
-                    { label: t('sales.total_revenue'), value: `$${totalRevenue.toLocaleString()}`, change: "+24.2%", icon: TrendingUp, color: "text-emerald-500" },
+                    { label: t('sales.total_revenue'), value: `${totalRevenue.toLocaleString()} сум`, change: "+24.2%", icon: TrendingUp, color: "text-emerald-500" },
                     { label: t('sales.active_orders'), value: orders.length, change: t('sales.live_sync'), icon: ShoppingCart, color: "text-blue-500" },
                     { label: t('sales.high_impact_leads'), value: "842", change: "+12.5%", icon: BadgeCheck, color: "text-purple-500" }
                 ].map((stat, i) => (

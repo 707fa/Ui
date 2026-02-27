@@ -101,7 +101,7 @@ export default function Inventory() {
         {
             header: t('inventory.price'),
             accessorKey: "price" as keyof Product,
-            cell: (item: Product) => <span className="font-bold">${(item.price || 0).toLocaleString()}</span>
+            cell: (item: Product) => <span className="font-bold">{(item.price || 0).toLocaleString()} сум</span>
         },
         { header: t('inventory.stock'), accessorKey: "stock" as keyof Product },
         {

@@ -1,10 +1,11 @@
-// Оставляем только путь, так как Vite проксирует запросы
-const API_BASE_URL = '/api';
+// Используем переменную окружения для гибкости (заглушка или реальный бэк)
+const API_BASE_URL = import.meta.env.VITE_API_URL || '/api';
 
 export const api = {
     get: async (endpoint: string) => {
         const url = endpoint.startsWith('/') ? endpoint : `/${endpoint}`;
         const response = await fetch(`${API_BASE_URL}${url}`);
+
 
         if (!response.ok) {
             const errorData = await response.json().catch(() => ({}));

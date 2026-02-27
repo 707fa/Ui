@@ -74,7 +74,7 @@ export default function Dashboard() {
     const stats = [
         {
             label: t('dashboard.total_revenue'),
-            value: statsData ? `$${(statsData.revenue || 0).toLocaleString()}` : "...",
+            value: statsData ? `${(statsData.revenue || 0).toLocaleString()} сум` : "...",
             change: "+20.1%",
             trend: "up",
             icon: DollarSign,
@@ -92,7 +92,7 @@ export default function Dashboard() {
         },
         {
             label: t('dashboard.inventory_value'),
-            value: statsData ? `$${(statsData.stockValue || 0).toLocaleString()}` : "...",
+            value: statsData ? `${(statsData.stockValue || 0).toLocaleString()} сум` : "...",
             change: "-2.3%",
             trend: "down",
             icon: Package,
@@ -226,7 +226,7 @@ export default function Dashboard() {
                                     axisLine={false}
                                     tickLine={false}
                                     tick={{ fill: '#9ca3af', fontSize: 10, fontWeight: 700 }}
-                                    tickFormatter={(val) => `$${val / 1000}k`}
+                                    tickFormatter={(val) => `${val / 1000}k сум`}
                                 />
                                 <Tooltip
                                     contentStyle={{

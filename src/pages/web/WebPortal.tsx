@@ -1,8 +1,20 @@
+import { useState, useEffect } from 'react';
 import { ShoppingBag, BarChart3, Settings as SettingsIcon, ExternalLink, Image as ImageIcon } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import { orderService, type DashboardStats } from '../../api/orderService';
 
 export default function WebPortal() {
     const { t } = useTranslation();
+    const [stats, setStats] = useState<DashboardStats | null>(null);
+
+    useEffect(() => {
+        const loadStats = async () => {
+            const data = await orderService.getDashboardStats();
+            setStats(data);
+        };
+        loadStats();
+    }, []);
+
     return (
         <div className="space-y-8">
             <div className="flex justify-between items-end">
@@ -31,14 +43,15 @@ export default function WebPortal() {
                             </div>
                             <div className="bg-white/10 backdrop-blur-md p-4 rounded-xl">
                                 <p className="text-indigo-200 text-xs uppercase font-bold">{t('web.orders_stat')}</p>
-                                <p className="text-2xl font-bold mt-1">482</p>
+                                <p className="text-2xl font-bold mt-1">{stats?.ordersCount || '482'}</p>
                             </div>
                             <div className="bg-white/10 backdrop-blur-md p-4 rounded-xl">
                                 <p className="text-indigo-200 text-xs uppercase font-bold">{t('web.revenue_stat')}</p>
-                                <p className="text-2xl font-bold mt-1">$45k</p>
+                                <p className="text-2xl font-bold mt-1">${(stats?.revenue || 45000).toLocaleString()}</p>
                             </div>
                         </div>
                     </div>
+
 
                     {/* Mock visuals */}
                     <div className="absolute right-0 bottom-0 w-1/3 h-[120%] bg-white/5 skew-x-12 translate-x-10 translate-y-10 group-hover:translate-x-5 transition-transform duration-500"></div>

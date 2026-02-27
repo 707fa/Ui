@@ -19,7 +19,7 @@ export default function Payment() {
     const navigate = useNavigate();
     const { cart, total } = location.state as { cart: CartItem[], total: number } || { cart: [], total: 0 };
 
-    const [method, setMethod] = useState<'card' | 'cash' | 'payme' | 'click'>('card');
+    const [method, setMethod] = useState<'card' | 'cash' | 'payme' | 'click' | 'uzcard' | 'humo'>('card');
     const [isProcessing, setIsProcessing] = useState(false);
     const [isSuccess, setIsSuccess] = useState(false);
 
@@ -72,11 +72,14 @@ export default function Payment() {
 
             let customerInfo = "";
             switch (method) {
-                case 'card': customerInfo = `Card: ${cardHolder}`; break;
+                case 'card': customerInfo = `Visa/Mastercard: ${cardHolder}`; break;
+                case 'uzcard': customerInfo = `Uzcard: ${cardNumber.substring(0, 4)}...`; break;
+                case 'humo': customerInfo = `Humo: ${cardNumber.substring(0, 4)}...`; break;
                 case 'payme': customerInfo = `Payme: +998${phoneNumber}`; break;
                 case 'click': customerInfo = `Click: +998${phoneNumber}`; break;
                 default: customerInfo = "Walk-in (Cash)";
             }
+
 
             await orderService.create({
                 items: orderItems,
@@ -85,10 +88,11 @@ export default function Payment() {
                 status: 'Paid'
             });
 
-            // Realistic delay for Payme/Click
-            if (method === 'payme' || method === 'click') {
-                await new Promise(resolve => setTimeout(resolve, 2000));
+            // Realistic delay for Gateways
+            if (['payme', 'click', 'uzcard', 'humo'].includes(method)) {
+                await new Promise(resolve => setTimeout(resolve, 3000));
             }
+
 
             setIsProcessing(false);
             setIsSuccess(true);
@@ -185,22 +189,32 @@ export default function Payment() {
                         <button
                             onClick={() => setMethod('card')}
                             className={`py-3 px-4 rounded-xl border-2 flex items-center justify-center gap-2 font-medium transition-all ${method === 'card'
-                                ? 'border-blue-600 bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400'
+                                ? 'border-orange-500 bg-orange-50 dark:bg-orange-900/20 text-orange-700 dark:text-orange-400'
                                 : 'border-gray-200 dark:border-zinc-700 text-gray-600 dark:text-gray-400 hover:border-gray-300 dark:hover:border-zinc-600'
                                 }`}
                         >
                             <CreditCard className="h-5 w-5" />
-                            {t('pos.card')}
+                            Visa/MC
                         </button>
                         <button
-                            onClick={() => setMethod('cash')}
-                            className={`py-3 px-4 rounded-xl border-2 flex items-center justify-center gap-2 font-medium transition-all ${method === 'cash'
-                                ? 'border-emerald-600 bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-400'
+                            onClick={() => setMethod('uzcard')}
+                            className={`py-3 px-4 rounded-xl border-2 flex items-center justify-center gap-2 font-medium transition-all ${method === 'uzcard'
+                                ? 'border-blue-700 bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400'
                                 : 'border-gray-200 dark:border-zinc-700 text-gray-600 dark:text-gray-400 hover:border-gray-300 dark:hover:border-zinc-600'
                                 }`}
                         >
-                            <Banknote className="h-5 w-5" />
-                            {t('pos.cash')}
+                            <div className="w-5 h-5 bg-blue-700 rounded-lg flex items-center justify-center text-[8px] text-white font-bold italic">UZ</div>
+                            Uzcard
+                        </button>
+                        <button
+                            onClick={() => setMethod('humo')}
+                            className={`py-3 px-4 rounded-xl border-2 flex items-center justify-center gap-2 font-medium transition-all ${method === 'humo'
+                                ? 'border-orange-600 bg-orange-50 dark:bg-orange-900/20 text-orange-700 dark:text-orange-400'
+                                : 'border-gray-200 dark:border-zinc-700 text-gray-600 dark:text-gray-400 hover:border-gray-300 dark:hover:border-zinc-600'
+                                }`}
+                        >
+                            <div className="w-5 h-5 bg-orange-600 rounded-lg flex items-center justify-center text-[8px] text-white font-bold italic">H</div>
+                            Humo
                         </button>
                         <button
                             onClick={() => setMethod('payme')}
@@ -222,10 +236,21 @@ export default function Payment() {
                             <div className="w-5 h-5 bg-blue-500 rounded-lg flex items-center justify-center text-[10px] text-white font-bold">C</div>
                             Click
                         </button>
+                        <button
+                            onClick={() => setMethod('cash')}
+                            className={`py-3 px-4 rounded-xl border-2 flex items-center justify-center gap-2 font-medium transition-all ${method === 'cash'
+                                ? 'border-emerald-600 bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-400'
+                                : 'border-gray-200 dark:border-zinc-700 text-gray-600 dark:text-gray-400 hover:border-gray-300 dark:hover:border-zinc-600'
+                                }`}
+                        >
+                            <Banknote className="h-5 w-5" />
+                            {t('pos.cash')}
+                        </button>
                     </div>
 
+
                     <AnimatePresence mode="wait">
-                        {method === 'card' && (
+                        {(method === 'card' || method === 'uzcard' || method === 'humo') && (
                             <motion.div
                                 key="card"
                                 initial={{ opacity: 0, y: 10 }}
@@ -233,15 +258,15 @@ export default function Payment() {
                                 exit={{ opacity: 0, y: -10 }}
                                 className="space-y-4"
                             >
-                                <div className="bg-gradient-to-r from-blue-700 to-indigo-800 rounded-xl p-6 text-white shadow-lg mb-6 relative overflow-hidden">
+                                <div className={`bg-gradient-to-r ${method === 'uzcard' ? 'from-blue-700 to-blue-900' : method === 'humo' ? 'from-orange-500 to-orange-700' : 'from-gray-700 to-gray-900'} rounded-xl p-6 text-white shadow-lg mb-6 relative overflow-hidden`}>
                                     <div className="absolute top-0 right-0 w-32 h-32 bg-white opacity-5 rounded-full -mr-10 -mt-10"></div>
                                     <div className="absolute bottom-0 left-0 w-24 h-24 bg-white opacity-5 rounded-full -ml-10 -mb-10"></div>
                                     <div className="flex justify-between items-start mb-8">
                                         <div className="w-12 h-8 bg-yellow-400/80 rounded"></div>
-                                        <span className="font-mono text-sm opacity-80">DEBIT</span>
+                                        <span className="font-mono text-sm opacity-80 uppercase">{method === 'card' ? 'Visa/MC' : method}</span>
                                     </div>
                                     <div className="font-mono text-xl tracking-widest mb-4">
-                                        {cardNumber || '•••• •••• •••• ••••'}
+                                        {cardNumber || (method === 'uzcard' ? '8600 •••• •••• ••••' : method === 'humo' ? '9860 •••• •••• ••••' : '•••• •••• •••• ••••')}
                                     </div>
                                     <div className="flex justify-between items-end">
                                         <div>
@@ -254,6 +279,7 @@ export default function Payment() {
                                         </div>
                                     </div>
                                 </div>
+
 
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{t('pos.card_number')}</label>
@@ -400,7 +426,8 @@ export default function Payment() {
                                 </>
                             ) : (
                                 <>
-                                    {method === 'card' ? t('pos.pay_with_card') : (method === 'payme' || method === 'click') ? `${t('pos.checkout')} ${method.toUpperCase()}` : t('pos.confirm_payment')}
+                                    {['card', 'uzcard', 'humo'].includes(method) ? t('pos.pay_with_card') : (method === 'payme' || method === 'click') ? `${t('pos.checkout')} ${method.toUpperCase()}` : t('pos.confirm_payment')}
+
                                 </>
                             )}
                         </button>

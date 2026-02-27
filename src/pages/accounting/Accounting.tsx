@@ -47,7 +47,7 @@ export default function Accounting() {
         {
             header: t('accounting.amount'),
             accessorKey: "amount" as keyof Invoice,
-            cell: (item: Invoice) => <span className="font-black">${(item.amount || 0).toLocaleString()}</span>
+            cell: (item: Invoice) => <span className="font-black">{(item.amount || 0).toLocaleString()} сум</span>
         },
         {
             header: t('accounting.status'),
@@ -111,7 +111,7 @@ export default function Accounting() {
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                 {[
-                    { label: t('accounting.receivables'), value: `$${totalReceivables.toLocaleString()}`, change: "-12.4%", icon: Receipt, color: "text-blue-500" },
+                    { label: t('accounting.receivables'), value: `${totalReceivables.toLocaleString()} сум`, change: "-12.4%", icon: Receipt, color: "text-blue-500" },
                     { label: t('accounting.margin'), value: "32.8%", change: "+4.2%", icon: BarChart3, color: "text-emerald-500" },
                     { label: t('accounting.health'), value: t('accounting.optimal'), change: t('accounting.verified'), icon: CheckCircle, color: "text-purple-500" }
                 ].map((stat, i) => (

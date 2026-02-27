@@ -38,24 +38,10 @@ export const orderService = {
 
     getDashboardStats: async (): Promise<DashboardStats> => {
         try {
-            const data = await api.get('/sale/orders/');
-            // If it's an array (from /sale/orders/), calculate basic stats
-            if (Array.isArray(data)) {
-                return {
-                    revenue: data.reduce((sum: number, o: any) => sum + (Number(o.total) || 0), 0),
-                    ordersCount: data.length,
-                    stockValue: 0,
-                    activities: []
-                };
-            }
-            // Return defaults if data is not as expected
-            return {
-                revenue: (data as any)?.revenue || 0,
-                ordersCount: (data as any)?.ordersCount || 0,
-                stockValue: (data as any)?.stockValue || 0,
-                activities: (data as any)?.activities || []
-            };
+            // Используем специальный эндпоинт для статистики
+            return await api.get('/dashboard-stats');
         } catch (error) {
+            console.error('Failed to fetch dashboard stats:', error);
             return {
                 revenue: 0,
                 ordersCount: 0,
@@ -64,6 +50,7 @@ export const orderService = {
             };
         }
     },
+
 
     delete: async (id: string): Promise<{ success: boolean }> => {
         return api.delete(`/sale/orders/${id}/`);
